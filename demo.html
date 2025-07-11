@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Authorize.Net Test Payment</title>
+    <script
+      type="text/javascript"
+      src="https://jstest.authorize.net/v1/Accept.js"
+    ></script>
+    <style>
+      body {
+        font-family: Arial;
+        max-width: 500px;
+        margin: auto;
+        padding: 30px;
+      }
+      input,
+      button {
+        padding: 10px;
+        margin: 10px 0;
+        width: 100%;
+        font-size: 16px;
+      }
+      .result {
+        margin-top: 20px;
+        background: #f0f0f0;
+        padding: 15px;
+        border-radius: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Test Authorize.Net Payment</h2>
+
+    <form id="paymentForm" onsubmit="return sendPaymentDataToAnet();">
+      <input
+        type="text"
+        id="cardNumber"
+        placeholder="Card Number"
+        required
+      /><br />
+      <input
+        type="text"
+        id="expMonth"
+        placeholder="Expiration Month (MM)"
+        required
+      /><br />
+      <input
+        type="text"
+        id="expYear"
+        placeholder="Expiration Year (YYYY)"
+        required
+      /><br />
+      <input type="text" id="cvv" placeholder="CVV" required /><br />
+
+      <button type="submit">Generate Opaque Data</button>
+    </form>
+
+    <div class="result">
+      <strong>Opaque Data Response:</strong>
+      <pre id="response"></pre>
+    </div>
+
+    <script type="text/javascript">
+      function sendPaymentDataToAnet() {
+        var authData = {};
+        authData.clientKey =
+          "9yJ7q795TcEtD282mSEj22aPamVuk8pHkuHqQz7XRB9wPpvh9RU344AJ9WeJudT9";
+        authData.apiLoginID = "2Bs6vMCnu2n";
+
+        var cardData = {};
+        cardData.cardNumber = document.getElementById("cardNumber").value;
+        cardData.month = document.getElementById("expMonth").value;
+        cardData.year = document.getElementById("expYear").value;
+        cardData.cardCode = document.getElementById("cvv").value;
+
+        var secureData = {};
+        secureData.authData = authData;
+        secureData.cardData = cardData;
+
+        Accept.dispatchData(secureData, responseHandler);
+        return false;
+      }
+
+      function responseHandler(response) {
+        const resultDiv = document.getElementById("response");
+        if (response.messages.resultCode === "Error") {
+          let errors = response.messages.message.map((e) => e.text).join("\n");
+          resultDiv.textContent = "Error: " + errors;
+        } else {
+          resultDiv.textContent = JSON.stringify(response.opaqueData, null, 4);
+          // Send this to your API: opaqueData.dataValue, opaqueData.dataDescriptor
+        }
+      }
+    </script>
+  </body>
+</html>
